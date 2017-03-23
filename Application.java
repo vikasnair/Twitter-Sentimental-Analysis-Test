@@ -1,6 +1,7 @@
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.text.DecimalFormat;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 import twitter4j.TwitterException;
@@ -17,17 +18,47 @@ public class Application {
 
 	public static void menu() {
 		Scanner input = new Scanner(System.in);
+		DecimalFormat formatter = new DecimalFormat("#0.00");
 
 		while (true) {
 			System.out.print("\nPlease enter a topic to analyze: "); 
 			String user_query = input.nextLine();
 
-			System.out.println("\n\nThe sentiment score for " + user_query + " is: " + analyze(user_query));
+			double result = analyze(user_query);
+			String f_result = formatter.format(result);
+
+			if (result != 101010) {
+				System.out.println("\n\nThe sentiment score for " + user_query + " is: " + f_result);
+
+				if (result == 0) {
+					System.out.println("The Twitterverse is indifferent about " + user_query + ".");
+				}
+
+				else if (result > 0) {
+					if (result < 1.5) {
+						System.out.println("The Twitterverse is in favor of " + user_query + ".");
+					}
+
+					else {
+						System.out.println("The Twitterverse is overwhelmingly in favor of " + user_query + ".");
+					}
+				}
+
+				else {
+					if (result > -1.5) {
+						System.out.println("The Twitterverse is opposed to " + user_query + ".");
+					}
+
+					else {
+						System.out.println("The Twitterverse is overwhelmingly opposed to " + user_query + ".");
+					}
+				}
+			}
 
 			System.out.print("\nExit (y/n)? "); String prompt = input.nextLine();
 
 			while (prompt.charAt(0) != 'y' && prompt.charAt(0) != 'n') {
-				System.out.print("\nSorry! Couldn't understand you. Print all tweets (y/n)? "); prompt = input.nextLine();	
+				System.out.print("\nSorry! Couldn't understand you. Exit (y/n)? "); prompt = input.nextLine();	
 			}
 
 			if (prompt.charAt(0) == 'y') {
@@ -42,7 +73,7 @@ public class Application {
 
 	// bulk of the program, which analyzes a given query
 
-	public static int analyze(String user_query) {
+	public static double analyze(String user_query) {
 		Scanner input = new Scanner(System.in);
 
 		try {
@@ -80,7 +111,7 @@ public class Application {
 
 			int count = 0;
 
-			while (result.hasNext() && count < 32) { // 320 max
+			while (result.hasNext() && count < 10) { // 32 max
 				for (Status status : result.getTweets()) {
 
 					// exclude retweets and links
@@ -105,15 +136,15 @@ public class Application {
 				count++;
 			}
 
-			int total_sentiment = 0;
+			double total_sentiment = 0;
 
 			for (Status status : statuses) {
 
 				// search through the dictionary
-				// for each status, if a word in the dictionary appears in the current status, then add its evaluation (representing a subjective net negativity / positivity score)
+				// for each status, if a word in the dictionary appears in the current status (and not in the query), then add its evaluation (representing a subjective net negativity / positivity score)
 
 				for (Sentiment sentiment : dictionary.dictionary) {
-					if (status.getText().contains(sentiment.get_word())) {
+					if (status.getText().contains(sentiment.get_word()) && !user_query.contains(sentiment.get_word())) {
 						total_sentiment += sentiment.get_evaluation();
 					}
 				}
@@ -131,14 +162,20 @@ public class Application {
 				print(statuses);
 			}
 
-			return total_sentiment;
-		}
+			if (statuses.size() != 0) {
+				return total_sentiment / statuses.size();
+			}
+
+			else {
+				return total_sentiment;
+			}
+		}	
 
 		catch (TwitterException ex) {
 			System.out.println("Can't reach Twitter. Check your internet. If that's fine, then try again in 15 minutes.");
 		}
 
-		return 0;
+		return 101010;
 	}
 
 	// a simple method to print relevant information per status
