@@ -10,6 +10,7 @@ Instructions:
 
 **Compile:**
 javac -cp twitter4j-core-4.0.4.jar *.java
+NOTE: do not re-compile. Doing so will override the API configuration.
 
 **Run:**
 java -cp .:twitter4j-core-4.0.4.jar Application

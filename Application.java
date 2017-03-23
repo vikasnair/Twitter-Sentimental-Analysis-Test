@@ -116,7 +116,7 @@ public class Application {
 
 					// exclude retweets and links
 
-					if (!status.isRetweet() && !status.getText().toLowerCase().contains("http")) {
+					if (!status.isRetweet() && status.getURLEntities().length == 0) {
 
 						// if the status is a quote and the quote has not already been added, then add the quote
 
