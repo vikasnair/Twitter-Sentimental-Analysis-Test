@@ -9,6 +9,7 @@ public class Dictionary {
 	// array list to store word obects
 
 	public ArrayList<Sentiment> dictionary = new ArrayList<>();
+	public ArrayList<String> dictionary_words = new ArrayList<>();
 
 	public Dictionary() {}
 	
@@ -76,6 +77,7 @@ public class Dictionary {
 
 					Sentiment new_sentiment = new Sentiment(word, polarity, power, type, stemmed);
 					dictionary.add(new_sentiment);
+					dictionary_words.add(word);
 				}
 			}
 
